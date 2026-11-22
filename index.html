@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>">
+  <meta name="theme-color" content="#8fc3f0">
+  <title>Family Island — Heart Hunt</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud" class="hidden">
+    <div id="score">0</div>
+    <div id="timer">60</div>
+    <div id="lives"></div>
+    <div id="combo"></div>
+  </div>
+
+  <div id="popups"></div>
+  <div id="joystick" class="hidden"><div id="knob"></div></div>
+
+  <div id="menu" class="overlay">
+    <div class="card">
+      <h1>Family Island</h1>
+      <p class="tag">Heart Hunt</p>
+      <p>Help <b>JM</b> collect hearts for <b>M</b>, <b>N</b> &amp; <b>H</b>.<br>
+         Golden hearts are worth more and add time.<br>
+         Watch the red circles — coconuts are falling!</p>
+      <p class="controls"><span class="kbd">WASD</span> / <span class="kbd">arrows</span> to move &nbsp;·&nbsp; on a phone, drag anywhere</p>
+      <button id="play" disabled>Loading…</button>
+      <p id="best-menu" class="best"></p>
+    </div>
+  </div>
+
+  <div id="over" class="overlay hidden">
+    <div class="card">
+      <h1 id="over-title">Time's up!</h1>
+      <p class="big"><span id="final">0</span> <small>points</small></p>
+      <p id="best-over" class="best"></p>
+      <button id="again">Play again</button>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
