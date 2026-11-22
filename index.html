@@ -22,10 +22,18 @@
   <canvas id="game"></canvas>
 
   <div id="hud" class="hidden">
-    <div class="chip"><span class="label">Hearts</span><span id="score">0</span></div>
+    <div class="chip"><span class="label">Score</span><span id="score">0</span><span id="tally" class="tally"></span></div>
     <div class="chip center"><span class="label">Time</span><span id="timer">1:00</span></div>
     <div class="chip right"><span class="label">Lives</span><span id="lives"></span></div>
+    <button class="mute hud-mute" aria-label="Sound on/off"></button>
     <div id="combo"></div>
+    <div id="catch"><img id="catch-img" alt=""><div id="catch-text"></div></div>
+    <div id="stamina" class="hidden"><div id="stamina-fill"></div></div>
+    <div id="prompt" class="hidden"></div>
+    <div id="touch-buttons">
+      <button id="btn-alt" class="hidden"></button>
+      <button id="btn-main">Jump</button>
+    </div>
   </div>
 
   <div id="popups"></div>
@@ -42,8 +50,12 @@
         <button class="hero" data-hero="M"><img id="portrait-M" alt=""><span>M</span></button>
       </div>
       <button id="play" class="primary" disabled>Loading…</button>
-      <p class="controls"><b>WASD</b> / <b>arrows</b> to run · on a phone, drag anywhere</p>
+      <div class="controls">
+        <p class="desk"><b>WASD/arrows</b> run · <b>double-tap</b> a direction to sprint · <b>Space</b> jump · <b>E</b> board the boat · <b>Space</b> to fish</p>
+        <p class="mob"><b>Drag</b> to run · <b>double-tap &amp; hold</b> to sprint · buttons to jump, board and fish</p>
+      </div>
       <p id="best-menu" class="best"></p>
+      <button class="mute menu-mute" aria-label="Sound on/off"></button>
     </div>
   </div>
 
@@ -51,7 +63,8 @@
     <div class="card">
       <div class="kicker"><span class="bar"></span>Round over</div>
       <h1 id="over-title">Time's up!</h1>
-      <p class="big"><span id="final">0</span><small>hearts</small></p>
+      <p class="big"><span id="final">0</span><small>points</small></p>
+      <p id="over-tally" class="tally-over"></p>
       <p id="best-over" class="best"></p>
       <button id="again" class="primary">Play again</button>
       <button id="change" class="secondary">Change hero</button>

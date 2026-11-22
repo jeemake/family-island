@@ -158,3 +158,84 @@ button.secondary { margin-top: 8px; background: transparent; color: var(--ink); 
 .best { margin-top: 6px; font-size: 13px; font-weight: 700; text-align: center; min-height: 1.2em; }
 .card .big { font-size: 64px; font-weight: 800; letter-spacing: -0.04em; margin: 4px 0 2px; }
 .card .big small { font-size: 14px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-left: 8px; }
+
+/* Score breakdown */
+.tally { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
+.tally-over { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+
+/* Mute toggles */
+.mute {
+  width: 34px; height: 34px; border: none; cursor: pointer;
+  background: var(--paper) center / 18px no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1d1b' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z' fill='%231d1d1b'/%3E%3Cpath d='M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11'/%3E%3C/svg%3E");
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+.mute.off {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e8612c' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z' fill='%23e8612c'/%3E%3Cpath d='M16 9l6 6M22 9l-6 6'/%3E%3C/svg%3E");
+}
+.hud-mute { position: absolute; right: 12px; top: calc(env(safe-area-inset-top) + 76px); pointer-events: auto; }
+.menu-mute { position: absolute; top: 14px; right: 14px; box-shadow: none; background-color: #ece6db; }
+.card { position: relative; }
+
+/* Catch card */
+#catch {
+  position: absolute; left: 50%; top: calc(env(safe-area-inset-top) + 84px);
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 16px 6px 6px;
+  background: var(--paper);
+  border-bottom: 3px solid var(--orange);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  transform: translate(-50%, -20px); opacity: 0;
+  pointer-events: none;
+}
+#catch.show { animation: catch 2.2s ease-out forwards; }
+#catch img { width: 64px; height: 64px; }
+#catch-text { display: flex; flex-direction: column; }
+#catch-text b { font-size: 16px; }
+#catch-text span { font-size: 13px; font-weight: 700; color: var(--orange); }
+@keyframes catch {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  12%, 80% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
+/* Stamina */
+#stamina {
+  position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 22px); transform: translateX(-50%);
+  width: 140px; height: 8px; background: rgba(247, 244, 238, 0.85); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+#stamina-fill { height: 100%; width: 100%; background: var(--orange); transition: width 0.08s linear; }
+#stamina.tired #stamina-fill { background: #b9b2a6; }
+
+/* Keyboard hint */
+#prompt {
+  position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 42px); transform: translateX(-50%);
+  padding: 6px 12px; background: var(--ink); color: #fff;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap;
+}
+
+/* Touch buttons (phones only) */
+#touch-buttons { display: none; }
+body.touch #touch-buttons {
+  position: absolute; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 26px);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  pointer-events: auto;
+}
+#btn-main, #btn-alt {
+  font: inherit; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; border: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); touch-action: none;
+}
+#btn-main { width: 84px; height: 84px; border-radius: 50%; background: var(--orange); color: #fff; font-size: 15px; }
+#btn-main.urgent { background: #d8133a; animation: pulse 0.3s ease-in-out infinite alternate; }
+#btn-alt { padding: 10px 18px; background: var(--paper); color: var(--ink); font-size: 13px; border: 2px solid var(--ink); }
+@keyframes pulse { to { transform: scale(1.08); } }
+body.touch #stamina { bottom: calc(env(safe-area-inset-bottom) + 130px); left: auto; right: 14px; transform: none; width: 90px; }
+
+/* Sprint joystick */
+#joystick.sprint { border-color: #ffc83d; }
+#joystick.sprint #knob { background: #ffc83d; }
+
+/* Show the right control help */
+.controls p { margin: 0; }
+.controls .mob, body.touch .controls .desk { display: none; }
+body.touch .controls .mob { display: block; }

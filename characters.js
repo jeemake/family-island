@@ -224,30 +224,42 @@ export function makeCharacter(spec) {
   const waveSide = spec.waveSide ?? 1;
   const lerp = (a, b, k) => a + (b - a) * k;
 
-  /** mode: "idle" | "run" | "wave"; speed: 0..1 of full running speed; turn: yaw rate (rad/s). */
-  function update(dt, mode, speed = 1, turn = 0) {
+  /**
+   * mode: "idle" | "run" | "wave" | "sit" | "fish"
+   * speed: 0..~1.6 of normal running speed (above 1 = sprinting)
+   * turn: yaw rate (rad/s) for banking; opts.air: 0..1 airborne; opts.land: 0..1 landing squash
+   */
+  function update(dt, mode, speed = 1, turn = 0, opts = {}) {
     t += dt;
     const running = mode === "run" && speed > 0.05;
     gait = lerp(gait, running ? speed : 0, Math.min(1, dt * 8));
     waving = lerp(waving, mode === "wave" ? 1 : 0, Math.min(1, dt * 6));
-    // Cadence ~1.4 strides/s at full speed (2.8 steps/s), slower when jogging.
-    phase += dt * Math.PI * 2 * (0.9 + 0.5 * gait) * (gait > 0.02 ? 1 : 0);
-    const g = gait;
+    const air = opts.air ?? 0, land = opts.land ?? 0;
+    const seated = mode === "sit" || mode === "fish";
+    // Cadence ~1.4 strides/s at a run, quicker when sprinting; stride angles cap a bit above a run.
+    phase += dt * Math.PI * 2 * (0.9 + 0.5 * gait) * (gait > 0.02 && air < 0.5 ? 1 : 0);
+    const g = Math.min(gait, 1.3);
 
     for (const [i, side] of [-1, 1].entries()) {
       const ph = phase + (i ? Math.PI : 0);
       const L = legs[i];
       // Thigh drives forward up to ~45 deg, extends back ~20 deg.
-      L.hip.rotation.x = -(0.18 + 0.62 * Math.sin(ph)) * g;
+      let hip = -(0.18 + 0.62 * Math.sin(ph)) * g;
       // Knee: big heel kick through the swing, extends before landing, soft at mid-stance.
-      const kick = Math.max(0, Math.cos(ph + 0.25)) ** 1.5;
-      L.knee.rotation.x = (0.3 + 1.35 * kick) * g;
+      let knee = (0.3 + 1.35 * Math.max(0, Math.cos(ph + 0.25)) ** 1.5) * g + land * 0.5;
       // Ankle: toes lift on the swing, push off behind.
-      L.ankle.rotation.x = (-0.25 * Math.sin(ph) - 0.1) * g;
+      let ankle = (-0.25 * Math.sin(ph) - 0.1) * g;
+      if (seated) { hip = -1.45; knee = 1.45; ankle = 0; }
+      // Airborne: tuck the knees up, one leg a little ahead of the other.
+      hip = lerp(hip, -0.55 - 0.25 * side, air);
+      knee = lerp(knee, 1.2 + 0.2 * side, air);
+      ankle = lerp(ankle, 0.35, air);
+      L.hip.rotation.x = hip;
+      L.knee.rotation.x = knee;
+      L.ankle.rotation.x = ankle;
 
       // Arms pump opposite the legs with bent elbows.
       const A = arms[i];
-      // Upper arm swings ~25 deg forward to ~45 deg back; the elbow bends more on the forward swing.
       const armSwing = Math.sin(ph + Math.PI);
       let sx = (0.2 + 0.6 * armSwing) * g, sz = side * (0.07 + 0.08 * g);
       let ex = -(0.15 + (1.15 - 0.25 * armSwing) * g);
@@ -256,6 +268,12 @@ export function makeCharacter(spec) {
         sz = lerp(sz, side * (2.6 + 0.25 * Math.sin(t * 8)), waving);
         ex = lerp(ex, -0.35 + 0.25 * Math.sin(t * 8 + 0.6), waving);
       }
+      if (mode === "sit") { sx = -0.45; sz = side * 0.12; ex = -0.7; }
+      if (mode === "fish") { sx = -1.05 + 0.04 * Math.sin(t * 3); sz = side * -0.12; ex = -0.45; }
+      // Airborne: arms fly up and out for balance.
+      sx = lerp(sx, -0.5, air);
+      sz = lerp(sz, side * 0.75, air);
+      ex = lerp(ex, -0.7, air);
       A.shoulder.rotation.x = sx;
       A.shoulder.rotation.z = sz;
       A.elbow.rotation.x = ex;
@@ -263,18 +281,18 @@ export function makeCharacter(spec) {
 
     // Body: two bounces per stride (lowest at mid-stance), forward lean, hip/shoulder counter-twist.
     const bounce = Math.abs(Math.sin(phase));
-    body.position.y = (bounce * 0.035 - 0.022) * g + Math.sin(t * 2) * 0.003 * (1 - g);
-    torso.rotation.x = 0.2 * g;                         // lean into the run
-    torso.rotation.y = 0.16 * Math.sin(phase) * g;      // shoulders counter the hips
-    for (const L of legs) L.hip.rotation.y = -0.1 * Math.sin(phase) * g;
-    body.rotation.z = THREE.MathUtils.clamp(-turn * 0.04, -0.2, 0.2) * g; // bank into turns
-    head.rotation.x = -0.14 * g;                        // keep the eyes level
+    body.position.y = (bounce * 0.035 - 0.022) * g * (1 - air) + Math.sin(t * 2) * 0.003 * (1 - g) - land * 0.035;
+    torso.rotation.x = 0.2 * g * (1 - air) + 0.12 * air + (mode === "fish" ? 0.15 : 0);
+    torso.rotation.y = 0.16 * Math.sin(phase) * g * (1 - air);
+    for (const L of legs) L.hip.rotation.y = -0.1 * Math.sin(phase) * g * (1 - air);
+    body.rotation.z = THREE.MathUtils.clamp(-turn * 0.04, -0.2, 0.2) * g;
+    head.rotation.x = -0.14 * g;
     head.rotation.y = -torso.rotation.y * 0.7;
     head.rotation.z = Math.sin(t * 0.9) * 0.03 * (1 - g);
   }
 
   root.traverse((o) => { if (o.isMesh) o.userData.character = spec.name; });
-  return { root, update, spec };
+  return { root, update, spec, hipHeight: hipY * spec.height };
 }
 
 function addHair(head, hair, style) {

@@ -30,7 +30,7 @@ const PIER_DIR = new THREE.Vector2(Math.cos(PIER_ANGLE), Math.sin(PIER_ANGLE));
 const PIER_SIDE = new THREE.Vector2(-PIER_DIR.y, PIER_DIR.x);
 const PIER_START = 5.5, PIER_END = shoreRadius(PIER_ANGLE) + 2.6, PIER_HALF_W = 0.36, PIER_Y = 0.12;
 
-function inPier(x, z, margin = 0) {
+export function inPier(x, z, margin = 0) {
   const along = x * PIER_DIR.x + z * PIER_DIR.y;
   const across = x * PIER_SIDE.x + z * PIER_SIDE.y;
   return along > PIER_START - margin && along < PIER_END + margin && Math.abs(across) < PIER_HALF_W + margin;
@@ -422,16 +422,20 @@ export function buildWorld(scene, root) {
   }
 
   // ---- The boat, moored beside the end of the pier ----
-  const boat = makeBoat();
+  // boat: position/heading driven by the game; bob: rocks on the waves inside it.
+  const boat = new THREE.Group();
+  boat.name = "Boat";
+  const bob = makeBoat();
+  boat.add(bob);
   const moor = PIER_END - 0.9;
-  boat.position.set(PIER_DIR.x * moor + PIER_SIDE.x * 0.95, WATER_Y, PIER_DIR.y * moor + PIER_SIDE.y * 0.95);
+  const mooring = new THREE.Vector3(PIER_DIR.x * moor + PIER_SIDE.x * 0.95, WATER_Y, PIER_DIR.y * moor + PIER_SIDE.y * 0.95);
+  boat.position.copy(mooring);
   boat.rotation.y = -PIER_ANGLE;
   scene.add(boat);
-  const boatBase = boat.position.clone();
   updaters.push((dt, t) => {
-    boat.position.y = boatBase.y + Math.sin(t * 1.3) * 0.035;
-    boat.rotation.z = Math.sin(t * 1.1) * 0.035;
-    boat.rotation.x = Math.sin(t * 0.8) * 0.02;
+    bob.position.y = Math.sin(t * 1.3) * 0.035;
+    bob.rotation.z = Math.sin(t * 1.1) * 0.035 + (boat.userData.lean || 0);
+    bob.rotation.x = Math.sin(t * 0.8) * 0.02;
   });
 
   // ---- Floating heart above the family ----
@@ -448,6 +452,12 @@ export function buildWorld(scene, root) {
 
   return {
     circles, boxes, occluders, heartMat,
+    boat, boatBob: bob,
+    dock: {
+      mooring, heading: PIER_ANGLE,
+      // Where the hero steps off onto the pier, beside the mooring.
+      step: new THREE.Vector3(PIER_DIR.x * moor + PIER_SIDE.x * 0.12, PIER_Y, PIER_DIR.y * moor + PIER_SIDE.y * 0.12),
+    },
     spots: {
       adult: new THREE.Vector3(0.95, 0, 2.05),
       kids: [new THREE.Vector3(0.38, 0, 2.15), new THREE.Vector3(-0.15, 0, 2.1)],
