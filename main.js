@@ -10,7 +10,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { makeCharacter, FAMILY } from "./characters.js";
 import { buildWorld, groundHeight, walkable, makeHeart, inPier, shoreRadius } from "./world.js";
 
-const ROUND_SECONDS = 60;
+const ROUND_SECONDS = 120;
 const LIVES = 3;
 const RUN_SPEED = 2.7;
 const SPRINT_SPEED = 4.3;
@@ -1245,7 +1245,7 @@ function tick() {
       if (!state.inBoat) state.nextCoconut -= dt; // coconuts only fall on land
       if (state.nextCoconut <= 0) {
         spawnCoconut();
-        state.nextCoconut = Math.max(0.45, 1.4 - state.elapsed * 0.016) * (0.7 + Math.random() * 0.6);
+        state.nextCoconut = Math.max(0.45, 1.4 - state.elapsed * 0.008) * (0.7 + Math.random() * 0.6);
       }
       if (state.time <= 0) { state.time = 0; endGame("Time's up!"); }
       renderHud();
