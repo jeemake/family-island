@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>">
-  <meta name="theme-color" content="#8fc3f0">
+  <meta name="theme-color" content="#7cc7d2">
   <title>Family Island — Heart Hunt</title>
   <link rel="stylesheet" href="style.css">
   <script type="importmap">
@@ -22,9 +22,9 @@
   <canvas id="game"></canvas>
 
   <div id="hud" class="hidden">
-    <div id="score">0</div>
-    <div id="timer">60</div>
-    <div id="lives"></div>
+    <div class="chip"><span class="label">Hearts</span><span id="score">0</span></div>
+    <div class="chip center"><span class="label">Time</span><span id="timer">1:00</span></div>
+    <div class="chip right"><span class="label">Lives</span><span id="lives"></span></div>
     <div id="combo"></div>
   </div>
 
@@ -33,23 +33,28 @@
 
   <div id="menu" class="overlay">
     <div class="card">
-      <h1>Family Island</h1>
-      <p class="tag">Heart Hunt</p>
-      <p>Help <b>JM</b> collect hearts for <b>M</b>, <b>N</b> &amp; <b>H</b>.<br>
-         Golden hearts are worth more and add time.<br>
-         Watch the red circles — coconuts are falling!</p>
-      <p class="controls"><span class="kbd">WASD</span> / <span class="kbd">arrows</span> to move &nbsp;·&nbsp; on a phone, drag anywhere</p>
-      <button id="play" disabled>Loading…</button>
+      <div class="kicker"><span class="bar"></span>A little island game</div>
+      <h1>Family<br>Island</h1>
+      <p id="lede" class="lede">Collect hearts for the family. Dodge the coconuts falling on the orange rings.</p>
+      <div class="label">Choose your hero</div>
+      <div class="heroes">
+        <button class="hero" data-hero="JM"><img id="portrait-JM" alt=""><span>JM</span></button>
+        <button class="hero" data-hero="M"><img id="portrait-M" alt=""><span>M</span></button>
+      </div>
+      <button id="play" class="primary" disabled>Loading…</button>
+      <p class="controls"><b>WASD</b> / <b>arrows</b> to run · on a phone, drag anywhere</p>
       <p id="best-menu" class="best"></p>
     </div>
   </div>
 
   <div id="over" class="overlay hidden">
     <div class="card">
+      <div class="kicker"><span class="bar"></span>Round over</div>
       <h1 id="over-title">Time's up!</h1>
-      <p class="big"><span id="final">0</span> <small>points</small></p>
+      <p class="big"><span id="final">0</span><small>hearts</small></p>
       <p id="best-over" class="best"></p>
-      <button id="again">Play again</button>
+      <button id="again" class="primary">Play again</button>
+      <button id="change" class="secondary">Change hero</button>
     </div>
   </div>
 

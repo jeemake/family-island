@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Character preview</title>
+  <style>html, body { margin: 0; background: #2f2f2f; overflow: hidden; } canvas { display: block; }</style>
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+  </script>
+</head>
+<body>
+<script type="module">
+  // Lines up the family against a dark backdrop, like the character reference sheet.
+  import * as THREE from "three";
+  import { makeCharacter, FAMILY } from "../characters.js";
+
+  const params = new URLSearchParams(location.search);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(devicePixelRatio);
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  document.body.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x2f2f2f);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.6));
+  const key = new THREE.DirectionalLight(0xfff2e0, 2.2);
+  key.position.set(2, 4, 3);
+  key.castShadow = true;
+  scene.add(key);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.ShadowMaterial({ opacity: 0.35 }));
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  const chars = ["JM", "M", "N", "H"].map((n, i) => {
+    const c = makeCharacter(FAMILY[n]);
+    c.root.position.x = (i - 1.5) * 0.45;
+    scene.add(c.root);
+    return c;
+  });
+  const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 50);
+  const zoom = params.get("zoom") === "face";
+  if (params.has("side")) {
+    // Side view of JM alone, for checking the run cycle.
+    chars.forEach((c, i) => { c.root.visible = i === 0; c.root.position.x = 0; });
+    chars[0].root.rotation.y = 0; // faces +z, so the camera on +x sees its profile
+    camera.position.set(3.2, 0.5, 0);
+    camera.lookAt(0, 0.48, 0);
+  } else {
+    camera.position.set(0.3, zoom ? 0.85 : 0.6, zoom ? 1.2 : 3.2);
+    camera.lookAt(zoom ? -0.45 : 0, zoom ? 0.85 : 0.45, 0);
+  }
+  const mode = params.get("mode") || "idle";
+  const clock = new THREE.Clock();
+  renderer.setAnimationLoop(() => {
+    const dt = Math.min(clock.getDelta(), 0.05);
+    chars.forEach((c, i) => c.update(dt, mode === "mix" ? ["run", "wave", "idle", "run"][i] : mode, 1));
+    renderer.render(scene, camera);
+  });
+</script>
+</body>
+</html>
